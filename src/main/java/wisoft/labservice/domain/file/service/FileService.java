@@ -5,7 +5,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import wisoft.labservice.domain.file.entity.FileCategory;
-import wisoft.labservice.domain.file.entity.FileResource;
+import wisoft.labservice.domain.file.entity.FileEntity;
 import wisoft.labservice.domain.file.repository.FileRepository;
 
 import java.io.File;
@@ -27,7 +27,7 @@ public class FileService {
 
     private static final List<String> ALLOWED_EXT = List.of("pdf", "png", "jpg", "jpeg");
 
-    public FileResource upload(MultipartFile file, String title, String categoryRaw) {
+    public FileEntity upload(MultipartFile file, String title, String categoryRaw) {
         if (file == null || file.isEmpty()) {
             throw new IllegalArgumentException("INVALID_FILE");
         }
@@ -70,31 +70,27 @@ public class FileService {
         // type은 pdf / img 두 가지로만
         String type = ext.equals("pdf") ? "pdf" : "img";
 
-        FileResource entity = FileResource.builder()
+        FileEntity entity = FileEntity.builder()
                 .id(id)
-                .title(title == null ? "" : title)
-                .category(category)
                 .fileUrl(fileUrl)
                 .type(type)
-                .createdAt(LocalDateTime.now())
                 .build();
 
         return fileRepository.save(entity);
     }
 
-    public FileResource get(String id) {
+    public FileEntity get(String id) {
         return fileRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("FILE_NOT_FOUND"));
     }
 
     public void delete(String id) {
-        FileResource file = get(id);
+        FileEntity file = get(id);
 
-        String folder = file.getCategory().name().toLowerCase();
         String fileName = file.getId() + "." + (file.getType().equals("pdf") ? "pdf" : "img");
         // ↑ 여기서 img일 때 실제 확장자까지 관리하고 싶으면 DB에 ext를 따로 저장해도 됨
 
-        Path path = Paths.get(storageRootPath, "files", folder, fileName);
+        Path path = Paths.get(storageRootPath, "files", fileName);
         File f = path.toFile();
         if (f.exists()) {
             f.delete();
