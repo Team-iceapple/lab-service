@@ -6,7 +6,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import wisoft.labservice.domain.file.dto.FileResponse;
-import wisoft.labservice.domain.file.entity.FileResource;
+import wisoft.labservice.domain.file.entity.FileEntity;
 import wisoft.labservice.domain.file.service.FileService;
 
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -39,7 +39,7 @@ public class FileController {
             @Parameter(description = "파일의 제목 (옵션)", required = false)
             @RequestParam(value = "title", required = false) String title
     ) {
-        FileResource saved = fileService.upload(file, title, category);
+        FileEntity saved = fileService.upload(file, title, category);
         return ResponseEntity.ok(new FileResponse(saved));
     }
 
@@ -49,7 +49,7 @@ public class FileController {
             @Parameter(description = "파일 ID", example = "f_1234-uuid")
             @PathVariable String fileId
     ) {
-        FileResource file = fileService.get(fileId);
+        FileEntity file = fileService.get(fileId);
         return ResponseEntity.ok(new FileResponse(file));
     }
 
