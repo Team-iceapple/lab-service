@@ -93,4 +93,7 @@ public class FileService {
 
         fileRepository.delete(file);
     }
+    public FileEntity upload(MultipartFile file) {
+        return upload(file, "home"); // 갤러리는 home 폴더 고정
+    }
 }

@@ -3,8 +3,8 @@ package wisoft.labservice.domain.home.service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import wisoft.labservice.domain.home.dto.NewsCreateRequest;
-import wisoft.labservice.domain.home.dto.NewsUpdateRequest;
+import wisoft.labservice.domain.home.dto.request.NewsCreateRequest;
+import wisoft.labservice.domain.home.dto.request.NewsUpdateRequest;
 import wisoft.labservice.domain.home.entity.News;
 import wisoft.labservice.domain.home.repository.NewsRepository;
 

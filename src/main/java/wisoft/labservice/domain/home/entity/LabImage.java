@@ -23,41 +23,23 @@ public class LabImage extends BaseTimeEntity {
 
     @Id
     @Column(length = 200)
-    private String id;
+    private String id; // imageId
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "file_id", nullable = false)
     private FileEntity file;
 
-    @Column(length = 200)
+    @Column(length = 255)
     private String title;
 
-    @Column(columnDefinition = "TEXT")
-    private String description;
-
-    @Column(name = "display_order")
-    private Integer displayOrder = 0;
-
     @Builder
-    public LabImage(String id, FileEntity file, String title,
-                    String description, Integer displayOrder) {
+    public LabImage(String id, FileEntity file, String title) {
         this.id = id;
         this.file = file;
         this.title = title;
-        this.description = description;
-        this.displayOrder = displayOrder != null ? displayOrder : 0;
     }
-
 
     public void updateTitle(String title) {
         this.title = title;
-    }
-
-    public void updateDisplayOrder(Integer displayOrder) {
-        this.displayOrder = displayOrder;
-    }
-
-    public void updateFile(FileEntity file) {
-        this.file = file;
     }
 }

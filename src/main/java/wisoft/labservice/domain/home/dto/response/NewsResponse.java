@@ -1,4 +1,4 @@
-package wisoft.labservice.domain.home.dto;
+package wisoft.labservice.domain.home.dto.response;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
