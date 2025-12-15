@@ -1,11 +1,11 @@
-package wisoft.auth.service;
+package wisoft.labservice.domain.auth.service;
 
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import wisoft.auth.repository.UserRepository;
-import wisoft.auth.User;
+import wisoft.labservice.domain.auth.repository.UserRepository;
+import wisoft.labservice.domain.auth.entity.User;
 
 @Service
 @RequiredArgsConstructor

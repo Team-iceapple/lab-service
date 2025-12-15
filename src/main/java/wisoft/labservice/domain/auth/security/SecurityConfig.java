@@ -1,4 +1,4 @@
-package wisoft.auth.security;
+package wisoft.labservice.domain.auth.security;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -24,7 +24,7 @@ public class SecurityConfig {
         http
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/login", "/extend", "/sign-up", "/validate").permitAll()
+                        .requestMatchers("/login", "/extend", "/sign-up", "/validate" ,"/api").permitAll()
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));

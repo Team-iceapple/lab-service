@@ -1,4 +1,4 @@
-package wisoft.auth.controller;
+package wisoft.labservice.domain.auth.controller;
 
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.JwtException;
@@ -8,11 +8,11 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import wisoft.auth.dto.LoginRequest;
-import wisoft.auth.dto.SignUpRequest;
-import wisoft.auth.dto.TokenResponse;
-import wisoft.auth.security.JwtTokenProvider;
-import wisoft.auth.service.AuthService;
+import wisoft.labservice.domain.auth.dto.LoginRequest;
+import wisoft.labservice.domain.auth.dto.SignUpRequest;
+import wisoft.labservice.domain.auth.dto.TokenResponse;
+import wisoft.labservice.domain.auth.security.JwtTokenProvider;
+import wisoft.labservice.domain.auth.service.AuthService;
 
 @RestController
 @RequiredArgsConstructor

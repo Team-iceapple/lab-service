@@ -1,4 +1,4 @@
-package wisoft.auth.security;
+package wisoft.labservice.domain.auth.security;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;

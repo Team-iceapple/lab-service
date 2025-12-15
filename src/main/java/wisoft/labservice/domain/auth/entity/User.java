@@ -1,4 +1,4 @@
-package wisoft.auth;
+package wisoft.labservice.domain.auth.entity;
 
 import jakarta.persistence.*;
 import lombok.Getter;

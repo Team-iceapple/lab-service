@@ -1,4 +1,4 @@
-package wisoft.auth.dto;
+package wisoft.labservice.domain.auth.dto;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Builder;
