@@ -8,47 +8,62 @@ import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.CreationTimestamp;
+
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "news")
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class News {
-    
+
     @Id
     @Column(length = 200)
     private String id;
-    
+
     @Column(nullable = false, length = 200)
     private String title;
-    
+
     @Column(columnDefinition = "TEXT")
     private String detail;
-    
-    @Column(name = "is_pinned")
+
+    @Column(name = "is_active", nullable = false)
+    private Boolean isActive = true;
+
+    @Column(name = "is_pinned", nullable = false)
     private Boolean isPinned = false;
-    
+
+    @CreationTimestamp
+    @Column(name = "created_at", updatable = false)
+    private LocalDateTime createdAt;
+
     @Builder
-    public News(String id, String title, String detail, Boolean isPinned) {
+    public News(String id,
+                String title,
+                String detail,
+                Boolean isActive,
+                Boolean isPinned) {
         this.id = id;
         this.title = title;
         this.detail = detail;
+        this.isActive = isActive != null ? isActive : true;
         this.isPinned = isPinned != null ? isPinned : false;
     }
-    
+
     public void updateTitle(String title) {
         this.title = title;
     }
-    
+
     public void updateDetail(String detail) {
         this.detail = detail;
     }
-    
-    public void togglePin() {
-        this.isPinned = !this.isPinned;
+
+    public void updateActive(Boolean isActive) {
+        this.isActive = isActive;
     }
-    
-    public void setPinned(Boolean isPinned) {
+
+    public void updatePinned(Boolean isPinned) {
         this.isPinned = isPinned;
     }
 }
