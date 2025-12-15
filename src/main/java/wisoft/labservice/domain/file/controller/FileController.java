@@ -34,12 +34,8 @@ public class FileController {
             @RequestParam("file") MultipartFile file,
 
             @Parameter(description = "파일의 카테고리(home, project, paper, award, seminar, patent)", required = true)
-            @RequestParam("category") String category,
-
-            @Parameter(description = "파일의 제목 (옵션)", required = false)
-            @RequestParam(value = "title", required = false) String title
-    ) {
-        FileEntity saved = fileService.upload(file, title, category);
+            @RequestParam("category") String category) {
+        FileEntity saved = fileService.upload(file, category);
         return ResponseEntity.ok(new FileResponse(saved));
     }
 

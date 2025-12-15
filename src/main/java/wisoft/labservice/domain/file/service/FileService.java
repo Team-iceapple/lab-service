@@ -1,5 +1,11 @@
 package wisoft.labservice.domain.file.service;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.List;
+import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -7,14 +13,6 @@ import org.springframework.web.multipart.MultipartFile;
 import wisoft.labservice.domain.file.entity.FileCategory;
 import wisoft.labservice.domain.file.entity.FileEntity;
 import wisoft.labservice.domain.file.repository.FileRepository;
-
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.time.LocalDateTime;
-import java.util.List;
-import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -27,7 +25,7 @@ public class FileService {
 
     private static final List<String> ALLOWED_EXT = List.of("pdf", "png", "jpg", "jpeg");
 
-    public FileEntity upload(MultipartFile file, String title, String categoryRaw) {
+    public FileEntity upload(MultipartFile file, String categoryRaw) {
         if (file == null || file.isEmpty()) {
             throw new IllegalArgumentException("INVALID_FILE");
         }
@@ -67,13 +65,10 @@ public class FileService {
         // 클라이언트한테 보여줄 URL (나중에 /media 매핑만 해주면 됨)
         String fileUrl = "/media/files/" + folder + "/" + fileName;
 
-        // type은 pdf / img 두 가지로만
-        String type = ext.equals("pdf") ? "pdf" : "img";
-
         FileEntity entity = FileEntity.builder()
                 .id(id)
                 .fileUrl(fileUrl)
-                .type(type)
+                .type(ext)
                 .build();
 
         return fileRepository.save(entity);
