@@ -37,6 +37,8 @@ out/
 .vscode/
 
 application.properties
+application-local.properties
+application-dev.properties
 
 # Environment variables
 .env

@@ -1,0 +1,70 @@
+package wisoft.labservice.domain.home.service;
+
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import wisoft.labservice.domain.home.dto.NewsCreateRequest;
+import wisoft.labservice.domain.home.dto.NewsUpdateRequest;
+import wisoft.labservice.domain.home.entity.News;
+import wisoft.labservice.domain.home.repository.NewsRepository;
+
+import java.util.List;
+import java.util.UUID;
+
+@Service
+@RequiredArgsConstructor
+@Transactional
+public class NewsService {
+
+    private final NewsRepository newsRepository;
+
+    // 목록 조회
+    @Transactional(readOnly = true)
+    public List<News> findAll() {
+        return newsRepository.findAllByOrderByCreatedAtDesc();
+    }
+
+    // 등록
+    public News create(NewsCreateRequest req) {
+        if (req.getTitle() == null || req.getTitle().isBlank()) {
+            throw new IllegalArgumentException("title is required");
+        }
+
+        News news = News.builder()
+                .id(UUID.randomUUID().toString())
+                .title(req.getTitle())
+                .detail(req.getDetail())
+                .isActive(req.getIsActive())
+                .isPinned(req.getIsPinned())
+                .build();
+
+        return newsRepository.save(news);
+    }
+
+    // 수정 (PATCH)
+    public void update(String id, NewsUpdateRequest req) {
+        News news = newsRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("news not found"));
+
+        if (req.getTitle() != null) {
+            news.updateTitle(req.getTitle());
+        }
+        if (req.getDetail() != null) {
+            news.updateDetail(req.getDetail());
+        }
+        if (req.getIsActive() != null) {
+            news.updateActive(req.getIsActive());
+        }
+        if (req.getIsPinned() != null) {
+            news.updatePinned(req.getIsPinned());
+        }
+    }
+
+    // 삭제
+    public void delete(String id) {
+        if (!newsRepository.existsById(id)) {
+            throw new IllegalArgumentException("news not found");
+        }
+        newsRepository.deleteById(id);
+    }
+}
