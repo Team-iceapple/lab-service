@@ -27,7 +27,7 @@ public class FileService {
 
     private static final List<String> ALLOWED_EXT = List.of("pdf", "png", "jpg", "jpeg");
 
-    public FileEntity upload(MultipartFile file, String title, String categoryRaw) {
+    public FileEntity upload(MultipartFile file, String categoryRaw) {
         if (file == null || file.isEmpty()) {
             throw new IllegalArgumentException("INVALID_FILE");
         }
@@ -67,13 +67,10 @@ public class FileService {
         // 클라이언트한테 보여줄 URL (나중에 /media 매핑만 해주면 됨)
         String fileUrl = "/media/files/" + folder + "/" + fileName;
 
-        // type은 pdf / img 두 가지로만
-        String type = ext.equals("pdf") ? "pdf" : "img";
-
         FileEntity entity = FileEntity.builder()
                 .id(id)
                 .fileUrl(fileUrl)
-                .type(type)
+                .type(ext)
                 .build();
 
         return fileRepository.save(entity);
