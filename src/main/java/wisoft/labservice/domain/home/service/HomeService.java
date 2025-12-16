@@ -6,7 +6,7 @@ import wisoft.labservice.domain.home.dto.response.HomeStatsResponse;
 import wisoft.labservice.domain.project.repository.ProjectRepository;
 import wisoft.labservice.domain.paper.repository.PaperRepository;
 //import wisoft.labservice.domain.award.repository.AwardRepository;
-//import wisoft.labservice.domain.patent.repository.PatentRepository;
+import wisoft.labservice.domain.patent.repository.PatentRepository;
 
 @Service
 @RequiredArgsConstructor
@@ -15,14 +15,16 @@ public class HomeService {
     private final ProjectRepository projectRepository;
     private final PaperRepository paperRepository;
 //    private final AwardRepository awardRepository;
-//    private final PatentRepository patentRepository;
+    private final PatentRepository patentRepository;
 
     public HomeStatsResponse getHomeStats() {
         return new HomeStatsResponse(
                 projectRepository.count(),
-                paperRepository.count()
-//                awardRepository.count(),
-//                patentRepository.count()
+                paperRepository.count(),
+                // Award 구현 후 교체 예정
+                1L,
+                // awardRepository.count(),
+                patentRepository.count()
         );
     }
 }
