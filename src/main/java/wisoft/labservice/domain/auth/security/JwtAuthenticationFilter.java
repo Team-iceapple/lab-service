@@ -19,7 +19,6 @@ import org.springframework.web.filter.OncePerRequestFilter;
 @RequiredArgsConstructor
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
-
     private static final String ACCESS_TOKEN_COOKIE = "ACCESS_TOKEN";
     private final JwtTokenProvider jwtTokenProvider;
 
@@ -45,7 +44,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 SecurityContextHolder.clearContext();
             }
         }
-
+        filterChain.doFilter(request, response);
     }
 
     private String extractTokenFromCookie(final HttpServletRequest request) {
