@@ -2,9 +2,9 @@ package wisoft.labservice.domain.home.controller;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
-import wisoft.labservice.domain.home.dto.NewsCreateRequest;
-import wisoft.labservice.domain.home.dto.NewsResponse;
-import wisoft.labservice.domain.home.dto.NewsUpdateRequest;
+import wisoft.labservice.domain.home.dto.request.NewsCreateRequest;
+import wisoft.labservice.domain.home.dto.response.NewsResponse;
+import wisoft.labservice.domain.home.dto.request.NewsUpdateRequest;
 import wisoft.labservice.domain.home.service.NewsService;
 
 import java.util.List;

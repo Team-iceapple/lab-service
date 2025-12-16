@@ -1,4 +1,4 @@
-package wisoft.labservice.domain.home.dto;
+package wisoft.labservice.domain.home.dto.request;
 
 import lombok.Getter;
 
