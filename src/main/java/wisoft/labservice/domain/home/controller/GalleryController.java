@@ -16,7 +16,7 @@ import java.util.Map;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/gallery")
+@RequestMapping("/admin/gallery")
 public class GalleryController {
 
     private final GalleryService galleryService;
