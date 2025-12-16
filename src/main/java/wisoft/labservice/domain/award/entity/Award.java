@@ -51,9 +51,6 @@ public class Award extends BaseTimeEntity {
     @Column(nullable = false)
     private Orientation orientation = Orientation.LANDSCAPE;
 
-    @Column(name = "display_order")
-    private Integer displayOrder = 0;
-
     @Builder
     public Award(String id, String title, String awardee, String competition,
                  String summary, LocalDate awardDate, Integer year,
@@ -67,7 +64,6 @@ public class Award extends BaseTimeEntity {
         this.year = year;
         this.imageFile = imageFile;
         this.orientation = orientation != null ? orientation : Orientation.LANDSCAPE;
-        this.displayOrder = displayOrder != null ? displayOrder : 0;
     }
 
     public void updateTitle(String title) {
@@ -100,10 +96,6 @@ public class Award extends BaseTimeEntity {
 
     public void updateOrientation(Orientation orientation) {
         this.orientation = orientation;
-    }
-
-    public void updateDisplayOrder(Integer displayOrder) {
-        this.displayOrder = displayOrder;
     }
 
     public enum Orientation {
