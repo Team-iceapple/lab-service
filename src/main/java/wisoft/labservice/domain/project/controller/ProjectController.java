@@ -11,7 +11,7 @@ import wisoft.labservice.domain.project.dto.response.ProjectListResponse;
 import wisoft.labservice.domain.project.service.ProjectService;
 
 @RestController
-@RequestMapping("/projects")
+@RequestMapping("/api/projects")
 @RequiredArgsConstructor
 public class ProjectController {
 
