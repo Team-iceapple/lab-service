@@ -40,6 +40,9 @@ dependencies {
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
     implementation("org.postgresql:postgresql:42.7.4")
     implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.5.0")
+    implementation("com.google.api-client:google-api-client:2.6.0")
+    implementation("com.google.oauth-client:google-oauth-client-jetty:1.36.0")
+    implementation("com.google.apis:google-api-services-calendar:v3-rev20240603-2.0.0")
 }
 
 tasks.withType<Test> {
