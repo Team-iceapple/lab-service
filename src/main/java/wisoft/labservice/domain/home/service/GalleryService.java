@@ -32,8 +32,7 @@ public class GalleryService {
         for (int i = 0; i < files.size(); i++) {
 
             // 1. 파일 업로드 (딱 1번)
-            var fileEntity = fileService.upload(files.get(i));
-
+            var fileEntity = fileService.upload(files.get(i), "home");
             // 2. title 처리 (빈 문자열 → null)
             String title = null;
             if (titles != null && titles.size() > i && !titles.get(i).isBlank()) {

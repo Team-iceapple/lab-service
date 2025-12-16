@@ -59,13 +59,6 @@ public class GalleryController {
         return galleryService.getSlides();
     }
 
-//    @PostMapping("/slides")
-//    public Map<String, Object> createSlides(@RequestBody ImageIdsRequest request) {
-//        return Map.of(
-//                "slides",
-//                galleryService.createSlides(request.getImageIds())
-//        );
-//    }
     @PostMapping("/slides")
     public Map<String, Object> createSlides(
             @RequestBody List<String> imageIds
@@ -75,6 +68,7 @@ public class GalleryController {
                 galleryService.createSlides(imageIds)
         );
     }
+
 
     @PatchMapping("/slides")
     public Map<String, String> updateOrder(
