@@ -38,7 +38,8 @@ public class SecurityConfig {
                 .logout(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-                        .requestMatchers("/auth/logout", "/login", "/extend", "/sign-up", "/logout", "/validate", "/api/**",
+                        .requestMatchers(HttpMethod.DELETE, "/auth/logout").permitAll()
+                        .requestMatchers("/login", "/extend", "/sign-up", "/logout", "/validate", "/api/**",
                                 "/media/**").permitAll()
                         .anyRequest().authenticated()
                 )
