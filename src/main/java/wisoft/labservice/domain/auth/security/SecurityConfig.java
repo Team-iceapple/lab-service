@@ -34,7 +34,6 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .headers(headers -> headers
                         .frameOptions(FrameOptionsConfig::disable))
-                .logout(logout -> logout.disable())
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/login", "/extend", "/sign-up", "/logout", "/validate", "/api/**",
                                 "/media/**").permitAll()

@@ -120,7 +120,7 @@ public class AuthController {
         }
     }
 
-    @DeleteMapping("/logout")
+    @DeleteMapping("/auth/logout")
     public ResponseEntity<TokenResponse> logout() {
         ResponseCookie cookie = ResponseCookie.from(ACCESS_TOKEN_COOKIE, "")
                 .httpOnly(true)
