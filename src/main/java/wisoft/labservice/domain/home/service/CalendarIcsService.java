@@ -35,6 +35,7 @@ public class CalendarIcsService {
         return calendar.getComponents(Component.VEVENT).stream()
                 .map(c -> convert((VEvent) c))
                 .filter(e -> e != null)
+                .filter(this::isWithinNext7Days)
                 .toList();
     }
 
@@ -122,4 +123,25 @@ public class CalendarIcsService {
         );
     }
 
+    private boolean isWithinNext7Days(HomeCalendarResponse e) {
+
+        LocalDate today = LocalDate.now(KST);
+        LocalDate end = today.plusDays(6);
+
+        if (e.allDay()) {
+            LocalDate start = LocalDate.parse(e.start());
+            LocalDate finish = LocalDate.parse(e.end());
+
+            return !finish.isBefore(today) && !start.isAfter(end);
+        }
+
+        // 시간 일정
+        ZonedDateTime startAt = ZonedDateTime.parse(e.start());
+        ZonedDateTime endAt = ZonedDateTime.parse(e.end());
+
+        ZonedDateTime from = today.atStartOfDay(KST);
+        ZonedDateTime to = end.plusDays(1).atStartOfDay(KST);
+
+        return !endAt.isBefore(from) && !startAt.isAfter(to);
+    }
 }
