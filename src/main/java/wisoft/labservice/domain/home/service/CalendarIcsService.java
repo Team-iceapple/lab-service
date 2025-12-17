@@ -128,26 +128,26 @@ public class CalendarIcsService {
     }
 
     private boolean isWithinNext7Days(HomeCalendarResponse e) {
-        LocalDate today = LocalDate.now(KST);
-        LocalDate end = today.plusDays(6);
+
+        ZonedDateTime now = ZonedDateTime.now(KST);
+        ZonedDateTime until = now.plusDays(7).toLocalDate()
+                .plusDays(1)
+                .atStartOfDay(KST)
+                .minusNanos(1);
 
         if (e.allDay()) {
             LocalDate start = LocalDate.parse(e.start());
-            LocalDate finish = LocalDate.parse(e.end());
-            return !finish.isBefore(today) && !start.isAfter(end);
+            LocalDate end = LocalDate.parse(e.end());
+
+            ZonedDateTime startAt = start.atStartOfDay(KST);
+            ZonedDateTime endAt = end.plusDays(1).atStartOfDay(KST).minusNanos(1);
+
+            return !endAt.isBefore(now) && !startAt.isAfter(until);
         }
 
         ZonedDateTime startAt = ZonedDateTime.parse(e.start());
         ZonedDateTime endAt = ZonedDateTime.parse(e.end());
 
-        ZonedDateTime now = ZonedDateTime.now(KST);
-        if (endAt.isBefore(now)) {
-            return false;
-        }
-
-        LocalDate startDate = startAt.toLocalDate();
-        LocalDate endDate = endAt.toLocalDate();
-
-        return !endDate.isBefore(today) && !startDate.isAfter(end);
+        return !endAt.isBefore(now) && !startAt.isAfter(until);
     }
 }
