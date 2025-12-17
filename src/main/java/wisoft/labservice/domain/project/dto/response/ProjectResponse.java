@@ -11,9 +11,6 @@ public record ProjectResponse(
 
           String name,
 
-          @JsonProperty("team_name")
-          String teamName,
-
           List<ProjectMemberDto> members,
 
           String thumbnail,
@@ -25,7 +22,6 @@ public record ProjectResponse(
           return new ProjectResponse(
                   project.getId(),
                   project.getName(),
-                  null,
                   project.getMembers() != null ? project.getMembers().stream().map(ProjectMemberDto::from).collect(Collectors.toList()) : List.of(),
                   project.getThumbnailFile() != null ? project.getThumbnailFile().getFileUrl() : null,
                   project.getYear()
