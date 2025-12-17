@@ -1,7 +1,17 @@
 package wisoft.labservice.domain.home.controller;
 
+import java.util.List;
+import java.util.Map;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 import wisoft.labservice.domain.home.dto.request.ImageIdsRequest;
 import wisoft.labservice.domain.home.dto.request.ImageTitleUpdateRequest;
@@ -10,9 +20,6 @@ import wisoft.labservice.domain.home.dto.request.SlideOrderUpdateRequest;
 import wisoft.labservice.domain.home.dto.response.GalleryImageResponse;
 import wisoft.labservice.domain.home.dto.response.GallerySlideResponse;
 import wisoft.labservice.domain.home.service.GalleryService;
-
-import java.util.List;
-import java.util.Map;
 
 @RestController
 @RequiredArgsConstructor
