@@ -38,6 +38,34 @@ public class CalendarIcsService {
                 .toList();
     }
 
+    private ZonedDateTime toKst(TemporalAccessor t) {
+
+        if (t instanceof LocalDate) {
+            throw new IllegalArgumentException("LocalDate (all-day) must not be converted to ZonedDateTime");
+        }
+
+        if (t instanceof ZonedDateTime zdt) {
+            return zdt.withZoneSameInstant(KST);
+        }
+
+        if (t instanceof OffsetDateTime odt) {
+            return odt.atZoneSameInstant(KST);
+        }
+
+        if (t instanceof Instant inst) {
+            return inst.atZone(KST);
+        }
+
+        if (t instanceof LocalDateTime ldt) {
+            // TZ 정보 없는 경우 → UTC 가정
+            return ldt.atZone(ZoneOffset.UTC).withZoneSameInstant(KST);
+        }
+
+        throw new IllegalArgumentException(
+                "Unsupported DTSTART/DTEND type: " + t.getClass()
+        );
+    }
+
     private HomeCalendarResponse convert(VEvent event) {
 
         // STATUS (Optional<Property>)
@@ -66,7 +94,7 @@ public class CalendarIcsService {
         TemporalAccessor start = startProp.getDate();
         TemporalAccessor end = (endProp != null) ? endProp.getDate() : start;
 
-        boolean isAllDay = start instanceof DateTime;
+        boolean isAllDay = start instanceof LocalDate;
 
         if (isAllDay) {
             LocalDate startDate = (LocalDate) start;
@@ -94,19 +122,4 @@ public class CalendarIcsService {
         );
     }
 
-    private ZonedDateTime toKst(TemporalAccessor t) {
-        if (t instanceof ZonedDateTime zdt) {
-            return zdt.withZoneSameInstant(KST);
-        }
-        if (t instanceof OffsetDateTime odt) {
-            return odt.atZoneSameInstant(KST);
-        }
-        if (t instanceof Instant inst) {
-            return inst.atZone(KST);
-        }
-        if (t instanceof LocalDateTime ldt) {
-            return ldt.atZone(ZoneOffset.UTC).withZoneSameInstant(KST);
-        }
-        throw new IllegalArgumentException("Unsupported DTSTART/DTEND type: " + t.getClass());
-    }
 }
