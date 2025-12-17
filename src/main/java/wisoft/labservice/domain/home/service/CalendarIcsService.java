@@ -128,12 +128,6 @@ public class CalendarIcsService {
     }
 
     private boolean isWithinNext7Days(HomeCalendarResponse e) {
-        System.out.println(
-                "[FILTER CHECK] " +
-                        "allDay=" + e.allDay() +
-                        ", start=" + e.start() +
-                        ", end=" + e.end()
-        );
         LocalDate today = LocalDate.now(KST);
         LocalDate end = today.plusDays(6);
 
