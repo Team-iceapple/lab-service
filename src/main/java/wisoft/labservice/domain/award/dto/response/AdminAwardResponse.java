@@ -1,6 +1,8 @@
 package wisoft.labservice.domain.award.dto.response;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import java.time.LocalDate;
 import wisoft.labservice.domain.award.entity.Award;
 import wisoft.labservice.domain.award.entity.Award.Orientation;
 
@@ -8,6 +10,9 @@ public record AdminAwardResponse(
         String id,
 
         Integer year,
+
+        @JsonFormat(pattern = "yyyy-MM-dd")
+        LocalDate date,
 
         String title,
 
@@ -24,6 +29,7 @@ public record AdminAwardResponse(
         return new AdminAwardResponse(
                 award.getId(),
                 award.getYear(),
+                award.getAwardDate(),
                 award.getTitle(),
                 award.getImageFile() != null ? award.getImageFile().getFileUrl() : null,
                 award.getImageFile() != null ? award.getImageFile().getType() : null,

@@ -1,5 +1,6 @@
 package wisoft.labservice.domain.award.service;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -42,6 +43,7 @@ public class AwardService {
         List<Award> awards = awardRepository.findAllWithImageFile();
 
         List<AdminAwardResponse> awardResponse = awards.stream()
+                .sorted(Comparator.comparing(Award::getAwardDate).reversed())
                 .map(AdminAwardResponse::from)
                 .collect(Collectors.toList());
 
