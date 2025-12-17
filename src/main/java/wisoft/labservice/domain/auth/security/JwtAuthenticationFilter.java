@@ -27,6 +27,13 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                                     final FilterChain filterChain)
             throws ServletException, IOException {
 
+        String uri = request.getRequestURI();
+
+        if (uri.startsWith("/auth/")) {
+            filterChain.doFilter(request, response);
+            return;
+        }
+
         String token = extractTokenFromCookie(request);
 
         if (token != null) {
