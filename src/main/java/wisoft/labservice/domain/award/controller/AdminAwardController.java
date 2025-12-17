@@ -1,5 +1,6 @@
 package wisoft.labservice.domain.award.controller;
 
+import jakarta.validation.Valid;
 import java.time.LocalDate;
 import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -7,6 +8,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -44,19 +46,10 @@ public class AdminAwardController {
 
     @PostMapping
     public ResponseEntity<Void> createAward(
-            @RequestParam String title,
-            @RequestParam String awardee,
-            @RequestParam String competition,
-            @RequestParam(required = false) String summary,
-            @RequestParam
-            @DateTimeFormat(pattern = "yyyy-MM-dd")
-            LocalDate date,
-            @RequestParam Integer year,
+            @Valid @ModelAttribute AdminAwardCreateRequest request,
             @RequestPart("image_file") MultipartFile imageFile) {
-        AdminAwardCreateRequest request = new AdminAwardCreateRequest(title, awardee, competition, summary, date, year);
-
+        System.out.println(">>> createAward called");
         awardService.createAward(request, imageFile);
-
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
