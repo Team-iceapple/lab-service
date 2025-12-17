@@ -17,17 +17,9 @@ import wisoft.labservice.domain.home.service.HomeService;
 public class HomeController {
 
     private final HomeService homeService;
-    private final CalendarSyncScheduler scheduler;
 
     @GetMapping
     public HomeResponse getHome() {
-        System.out.println("here");
         return homeService.getHome();
     }
-
-    @GetMapping("/calendar")
-    public List<HomeCalendarResponse> getEvents() {
-        return scheduler.getCachedEvents();
-    }
-
 }
