@@ -8,6 +8,7 @@ import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.time.temporal.TemporalAccessor;
+import java.util.Comparator;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import net.fortuna.ical4j.model.Component;
@@ -16,6 +17,7 @@ import net.fortuna.ical4j.model.component.VEvent;
 import net.fortuna.ical4j.model.property.DateProperty;
 import org.springframework.stereotype.Service;
 import wisoft.labservice.domain.home.component.IcsFetcher;
+import wisoft.labservice.domain.home.dto.CalendarEvent;
 import wisoft.labservice.domain.home.dto.response.HomeCalendarResponse;
 
 @Service
@@ -34,12 +36,22 @@ public class CalendarIcsService {
                 .map(c -> convert((VEvent) c))
                 .filter(e -> e != null)
                 .filter(this::isWithinNext7Days)
-                .sorted((a, b) -> {
-                    if (a.allDay() && !b.allDay()) return -1;
-                    if (!a.allDay() && b.allDay()) return 1;
-                    return a.start().compareTo(b.start());
-                })
+                .sorted(Comparator
+                        .comparing(CalendarEvent::allDay).reversed()
+                        .thenComparing(CalendarEvent::startAt)
+                )
+                .map(this::toResponse)
                 .toList();
+    }
+
+    private HomeCalendarResponse toResponse(CalendarEvent e) {
+        return new HomeCalendarResponse(
+                e.id(),
+                e.title(),
+                e.allDay(),
+                e.startAt().toString(),햐
+                e.endAt().toString()
+        );
     }
 
     private ZonedDateTime toKst(TemporalAccessor t) {
@@ -70,16 +82,14 @@ public class CalendarIcsService {
         );
     }
 
-    private HomeCalendarResponse convert(VEvent event) {
+    private CalendarEvent convert(VEvent event) {
 
-        // STATUS (Optional<Property>)
         boolean cancelled = event.getProperty("STATUS")
                 .map(Property::getValue)
                 .map(v -> "CANCELLED".equalsIgnoreCase(v))
                 .orElse(false);
         if (cancelled) return null;
 
-        // UID / SUMMARY
         String id = event.getProperty("UID")
                 .map(Property::getValue)
                 .orElse(null);
@@ -88,7 +98,6 @@ public class CalendarIcsService {
                 .map(Property::getValue)
                 .orElse("");
 
-        // DTSTART / DTEND: Optional<Property> -> DateProperty인지 확인
         Property startP = event.getProperty("DTSTART").orElse(null);
         if (!(startP instanceof DateProperty startProp)) return null;
 
@@ -100,54 +109,33 @@ public class CalendarIcsService {
 
         boolean isAllDay = start instanceof LocalDate;
 
-
         if (isAllDay) {
-            LocalDate startDate = (LocalDate) start;
-            LocalDate endDate = (end instanceof LocalDate ? (LocalDate) end : startDate).minusDays(1);
+            LocalDate s = (LocalDate) start;
+            LocalDate e = (end instanceof LocalDate ? (LocalDate) end : s).minusDays(1);
 
-            return new HomeCalendarResponse(
+            return new CalendarEvent(
                     id,
                     title,
                     true,
-                    startDate.toString(),  // yyyy-MM-dd
-                    endDate.toString()
+                    s.atStartOfDay(KST),
+                    e.plusDays(1).atStartOfDay(KST).minusNanos(1)
             );
         }
 
-        // 시간 일정: UTC/로컬 -> KST
-        ZonedDateTime startAt = toKst(start);
-        ZonedDateTime endAt = toKst(end);
-
-        return new HomeCalendarResponse(
+        return new CalendarEvent(
                 id,
                 title,
                 false,
-                startAt.toString(),      // ISO-8601 with +09:00
-                endAt.toString()
+                toKst(start),
+                toKst(end)
         );
     }
 
-    private boolean isWithinNext7Days(HomeCalendarResponse e) {
-
+    private boolean isWithinNext7Days(CalendarEvent e) {
         ZonedDateTime now = ZonedDateTime.now(KST);
-        ZonedDateTime until = now.plusDays(7).toLocalDate()
-                .plusDays(1)
-                .atStartOfDay(KST)
-                .minusNanos(1);
+        ZonedDateTime until = now.plusDays(7);
 
-        if (e.allDay()) {
-            LocalDate start = LocalDate.parse(e.start());
-            LocalDate end = LocalDate.parse(e.end());
-
-            ZonedDateTime startAt = start.atStartOfDay(KST);
-            ZonedDateTime endAt = end.plusDays(1).atStartOfDay(KST).minusNanos(1);
-
-            return !endAt.isBefore(now) && !startAt.isAfter(until);
-        }
-
-        ZonedDateTime startAt = ZonedDateTime.parse(e.start());
-        ZonedDateTime endAt = ZonedDateTime.parse(e.end());
-
-        return !endAt.isBefore(now) && !startAt.isAfter(until);
+        return !e.endAt().isBefore(now)
+                && !e.startAt().isAfter(until);
     }
 }
