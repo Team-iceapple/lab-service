@@ -55,6 +55,7 @@ public class AwardService {
         return AdminAwardDetailResponse.from(award);
     }
 
+    @Transactional
     public void createAward(final AdminAwardCreateRequest request, final MultipartFile imageFile) {
         FileEntity uploadedFile = fileService.upload(imageFile, "AWARD");
 
@@ -72,6 +73,7 @@ public class AwardService {
         awardRepository.save(award);
     }
 
+    @Transactional
     public void updateAward(final String awardId, final AdminAwardUpdateRequest request, final MultipartFile imageFile) {
         Award award = awardRepository.findByIdWithImageFile(awardId)
                 .orElseThrow(() -> new IllegalArgumentException("Award not found with id: " + awardId));
@@ -104,6 +106,7 @@ public class AwardService {
         }
     }
 
+    @Transactional
     public void deleteAward(final String awardId) {
         Award award = awardRepository.findByIdWithImageFile(awardId)
                 .orElseThrow(() -> new IllegalArgumentException("Award not found with id: " + awardId));
