@@ -49,7 +49,7 @@ public class CalendarIcsService {
                 e.id(),
                 e.title(),
                 e.allDay(),
-                e.startAt().toString(),햐
+                e.startAt().toString(),
                 e.endAt().toString()
         );
     }
