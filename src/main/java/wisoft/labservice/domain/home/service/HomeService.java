@@ -5,6 +5,7 @@ import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import wisoft.labservice.domain.award.repository.AwardRepository;
+import wisoft.labservice.domain.home.component.CalendarSyncScheduler;
 import wisoft.labservice.domain.home.dto.response.HomeResponse;
 import wisoft.labservice.domain.home.dto.response.HomeResponse.CalendarDto;
 import wisoft.labservice.domain.home.dto.response.HomeResponse.CalendarEventDto;
@@ -27,6 +28,7 @@ public class HomeService {
     private final PatentRepository patentRepository;
     private final NewsRepository newsRepository;
     private final GalleryService galleryService;
+    private final CalendarSyncScheduler calendarSyncScheduler;
 
     public HomeStatsResponse getHomeStats() {
         return new HomeStatsResponse(
@@ -37,7 +39,7 @@ public class HomeService {
         );
     }
 
-    public HomeResponse getHome(){
+    public HomeResponse getHome() {
         //lab 정보
         List<String> imageUrls = galleryService.getSlides().stream()
                 .map(slide -> slide.getFile_url())
@@ -47,17 +49,16 @@ public class HomeService {
                 .imageUrls(imageUrls)
                 .build();
 
-
         //calendar
-        List<CalendarEventDto> calendarEvents = List.of(
-                CalendarEventDto.builder()
-                        .id("2")
-                        .title("프로젝트 발표")
-                        .start("2025-12-15T10:00:00+09:00")
-                        .end("2025-12-15T12:00:00+09:00")
-                        .allDay(false)
-                        .build()
-        );
+        List<CalendarEventDto> calendarEvents = calendarSyncScheduler.getCachedEvents().stream()
+                .map(event -> CalendarEventDto.builder()
+                        .id(event.id())
+                        .title(event.title())
+                        .start(event.start())
+                        .end(event.end())
+                        .allDay(event.allDay())
+                        .build())
+                .collect(Collectors.toList());
 
         CalendarDto calendar = CalendarDto.builder()
                 .events(calendarEvents)
@@ -68,7 +69,6 @@ public class HomeService {
                 .limit(5)
                 .map(HomeProjectDto::from)
                 .collect(Collectors.toList());
-
 
         //news
         List<HomeNewsDto> news = newsRepository.findAllByOrderByCreatedAtDesc().stream()
