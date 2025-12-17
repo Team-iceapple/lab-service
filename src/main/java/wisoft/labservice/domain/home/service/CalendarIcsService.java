@@ -11,7 +11,6 @@ import java.time.temporal.TemporalAccessor;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import net.fortuna.ical4j.model.Component;
-import net.fortuna.ical4j.model.DateTime;
 import net.fortuna.ical4j.model.Property;
 import net.fortuna.ical4j.model.component.VEvent;
 import net.fortuna.ical4j.model.property.DateProperty;
@@ -24,7 +23,6 @@ import wisoft.labservice.domain.home.dto.response.HomeCalendarResponse;
 public class CalendarIcsService {
 
     private static final ZoneId KST = ZoneId.of("Asia/Seoul");
-    private static final ZoneId UTC = ZoneId.of("UTC");
 
     private final IcsFetcher fetcher;
 
@@ -36,6 +34,11 @@ public class CalendarIcsService {
                 .map(c -> convert((VEvent) c))
                 .filter(e -> e != null)
                 .filter(this::isWithinNext7Days)
+                .sorted((a, b) -> {
+                    if (a.allDay() && !b.allDay()) return -1;
+                    if (!a.allDay() && b.allDay()) return 1;
+                    return a.start().compareTo(b.start());
+                })
                 .toList();
     }
 
@@ -97,6 +100,7 @@ public class CalendarIcsService {
 
         boolean isAllDay = start instanceof LocalDate;
 
+
         if (isAllDay) {
             LocalDate startDate = (LocalDate) start;
             LocalDate endDate = (end instanceof LocalDate ? (LocalDate) end : startDate).minusDays(1);
@@ -124,24 +128,32 @@ public class CalendarIcsService {
     }
 
     private boolean isWithinNext7Days(HomeCalendarResponse e) {
-
+        System.out.println(
+                "[FILTER CHECK] " +
+                        "allDay=" + e.allDay() +
+                        ", start=" + e.start() +
+                        ", end=" + e.end()
+        );
         LocalDate today = LocalDate.now(KST);
         LocalDate end = today.plusDays(6);
 
         if (e.allDay()) {
             LocalDate start = LocalDate.parse(e.start());
             LocalDate finish = LocalDate.parse(e.end());
-
             return !finish.isBefore(today) && !start.isAfter(end);
         }
 
-        // 시간 일정
         ZonedDateTime startAt = ZonedDateTime.parse(e.start());
         ZonedDateTime endAt = ZonedDateTime.parse(e.end());
 
-        ZonedDateTime from = today.atStartOfDay(KST);
-        ZonedDateTime to = end.plusDays(1).atStartOfDay(KST);
+        ZonedDateTime now = ZonedDateTime.now(KST);
+        if (endAt.isBefore(now)) {
+            return false;
+        }
 
-        return !endAt.isBefore(from) && !startAt.isAfter(to);
+        LocalDate startDate = startAt.toLocalDate();
+        LocalDate endDate = endAt.toLocalDate();
+
+        return !endDate.isBefore(today) && !startDate.isAfter(end);
     }
 }
