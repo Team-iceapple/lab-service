@@ -5,5 +5,5 @@ public record HomeCalendarResponse(
         String title,
         boolean allDay,
         String start,
-        String end
+        String  end
 ) {}
