@@ -9,17 +9,22 @@ import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.time.temporal.TemporalAccessor;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import net.fortuna.ical4j.model.Component;
 import net.fortuna.ical4j.model.Property;
 import net.fortuna.ical4j.model.component.VEvent;
 import net.fortuna.ical4j.model.property.DateProperty;
+import net.fortuna.ical4j.model.property.Sequence;
 import org.springframework.stereotype.Service;
 import wisoft.labservice.domain.home.component.IcsFetcher;
-import wisoft.labservice.domain.home.dto.CalendarEvent;
 import wisoft.labservice.domain.home.dto.response.HomeCalendarResponse;
+import wisoft.labservice.domain.home.dto.CalendarSyncEvent;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class CalendarIcsService {
@@ -29,24 +34,59 @@ public class CalendarIcsService {
     private final IcsFetcher fetcher;
 
     public List<HomeCalendarResponse> loadEvents(String icsUrl) throws Exception {
-
         var calendar = fetcher.fetch(icsUrl);
 
-        return calendar.getComponents(Component.VEVENT).stream()
-                .map(c -> convert((VEvent) c))
-                .filter(e -> e != null)
-                .filter(this::isWithinNext7Days)
+        Map<String, CalendarSyncEvent> byUid = new HashMap<>();
+
+        for (Component c : calendar.getComponents(Component.VEVENT)) {
+            CalendarSyncEvent event = convert((VEvent) c);
+            if (event == null) {
+                continue;
+            }
+            if (!isWithinNext7Days(event)) {
+                continue;
+            }
+
+            byUid.merge(
+                    event.uid(),
+                    event,
+                    this::pickLatest
+            );
+        }
+
+        return byUid.values().stream()
                 .sorted(Comparator
-                        .comparing(CalendarEvent::allDay).reversed()
-                        .thenComparing(CalendarEvent::startAt)
+                        .comparing(CalendarSyncEvent::allDay).reversed()
+                        .thenComparing(CalendarSyncEvent::startAt)
                 )
                 .map(this::toResponse)
                 .toList();
     }
 
-    private HomeCalendarResponse toResponse(CalendarEvent e) {
+    private CalendarSyncEvent pickLatest(
+            CalendarSyncEvent a,
+            CalendarSyncEvent b
+    ) {
+        if (b.sequence() > a.sequence()) {
+            return b;
+        }
+        if (b.sequence() < a.sequence()) {
+            return a;
+        }
+
+        if (a.lastModified() == null) {
+            return b;
+        }
+        if (b.lastModified() == null) {
+            return a;
+        }
+
+        return b.lastModified().isAfter(a.lastModified()) ? b : a;
+    }
+
+    private HomeCalendarResponse toResponse(CalendarSyncEvent e) {
         return new HomeCalendarResponse(
-                e.id(),
+                e.uid(),
                 e.title(),
                 e.allDay(),
                 e.startAt().toString(),
@@ -82,13 +122,15 @@ public class CalendarIcsService {
         );
     }
 
-    private CalendarEvent convert(VEvent event) {
+    private CalendarSyncEvent convert(VEvent event) {
 
         boolean cancelled = event.getProperty("STATUS")
                 .map(Property::getValue)
                 .map(v -> "CANCELLED".equalsIgnoreCase(v))
                 .orElse(false);
-        if (cancelled) return null;
+        if (cancelled) {
+            return null;
+        }
 
         String id = event.getProperty("UID")
                 .map(Property::getValue)
@@ -99,7 +141,9 @@ public class CalendarIcsService {
                 .orElse("");
 
         Property startP = event.getProperty("DTSTART").orElse(null);
-        if (!(startP instanceof DateProperty startProp)) return null;
+        if (!(startP instanceof DateProperty startProp)) {
+            return null;
+        }
 
         Property endP = event.getProperty("DTEND").orElse(null);
         DateProperty endProp = (endP instanceof DateProperty dp) ? dp : null;
@@ -109,29 +153,42 @@ public class CalendarIcsService {
 
         boolean isAllDay = start instanceof LocalDate;
 
+        int sequence = event.getSequence()
+                .map(Sequence::getSequenceNo)
+                .orElse(0);
+
+        ZonedDateTime lastModified = event.getLastModified()
+                .map(lm -> lm.getDate()
+                        .atZone(KST))
+                .orElse(null);
+
         if (isAllDay) {
             LocalDate s = (LocalDate) start;
             LocalDate e = (end instanceof LocalDate ? (LocalDate) end : s).minusDays(1);
 
-            return new CalendarEvent(
+            return new CalendarSyncEvent(
                     id,
                     title,
                     true,
                     s.atStartOfDay(KST),
-                    e.plusDays(1).atStartOfDay(KST).minusNanos(1)
+                    e.plusDays(1).atStartOfDay(KST).minusNanos(1),
+                    sequence,
+                    lastModified
             );
         }
 
-        return new CalendarEvent(
+        return new CalendarSyncEvent(
                 id,
                 title,
                 false,
                 toKst(start),
-                toKst(end)
+                toKst(end),
+                sequence,
+                lastModified
         );
     }
 
-    private boolean isWithinNext7Days(CalendarEvent e) {
+    private boolean isWithinNext7Days(CalendarSyncEvent e) {
         ZonedDateTime now = ZonedDateTime.now(KST);
         ZonedDateTime until = now.plusDays(7);
 
