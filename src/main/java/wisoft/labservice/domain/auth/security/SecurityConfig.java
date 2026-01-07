@@ -40,7 +40,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .requestMatchers(HttpMethod.DELETE, "/auth/logout").permitAll()
                         .requestMatchers("/login", "/extend", "/sign-up", "/logout", "/validate", "/api/**",
-                                "/media/**").permitAll()
+                                "/media/**", "/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
