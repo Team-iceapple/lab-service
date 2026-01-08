@@ -3,7 +3,6 @@ package wisoft.labservice.domain.auth.controller;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.JwtException;
 import lombok.RequiredArgsConstructor;
-import org.antlr.v4.runtime.Token;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
@@ -14,6 +13,8 @@ import wisoft.labservice.domain.auth.dto.SignUpRequest;
 import wisoft.labservice.domain.auth.dto.TokenResponse;
 import wisoft.labservice.domain.auth.security.JwtTokenProvider;
 import wisoft.labservice.domain.auth.service.AuthService;
+import wisoft.labservice.domain.common.exception.BusinessException;
+import wisoft.labservice.domain.common.exception.ErrorCode;
 
 @RestController
 @RequiredArgsConstructor
@@ -39,11 +40,11 @@ public class AuthController {
 
         if (request.getUsername() == null || request.getUsername().isBlank()
                 || request.getPassword() == null || request.getPassword().isBlank()) {
-            return ResponseEntity.badRequest().build();
+            throw new BusinessException(ErrorCode.MISSING_REQUIRED_PARAMETER);
         }
 
         if (!authService.authenticate(request.getUsername(), request.getPassword())) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+            throw new BusinessException(ErrorCode.UNAUTHORIZED);
         }
 
         String token = jwtTokenProvider.createToken(request.getUsername());
@@ -59,8 +60,7 @@ public class AuthController {
             @CookieValue(value = ACCESS_TOKEN_COOKIE, required = false) String token) {
 
         if (token == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .body(TokenResponse.builder().message("토큰이 없습니다.").build());
+            throw new BusinessException(ErrorCode.UNAUTHORIZED);
         }
 
         try {
@@ -76,12 +76,10 @@ public class AuthController {
                     .body(TokenResponse.builder().message("토큰 연장 성공").build());
 
         } catch (ExpiredJwtException e) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .body(TokenResponse.builder().message("토큰이 만료되었습니다").build());
+            throw new BusinessException(ErrorCode.EXPIRED_TOKEN);
 
         } catch (JwtException e) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .body(TokenResponse.builder().message("유효하지 않은 토큰입니다").build());
+            throw new BusinessException(ErrorCode.INVALID_TOKEN);
         }
     }
 
@@ -90,8 +88,7 @@ public class AuthController {
             @CookieValue(value = ACCESS_TOKEN_COOKIE, required = false) String token) {
 
         if (token == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .body(TokenResponse.builder().message("토큰이 없습니다.").build());
+            throw new BusinessException(ErrorCode.UNAUTHORIZED);
         }
 
         try {
@@ -101,23 +98,17 @@ public class AuthController {
             );
 
         } catch (ExpiredJwtException e) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .body(TokenResponse.builder().message("토큰이 만료되었습니다").build());
+            throw new BusinessException(ErrorCode.EXPIRED_TOKEN);
 
         } catch (JwtException e) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .body(TokenResponse.builder().message("유효하지 않은 토큰입니다").build());
+            throw new BusinessException(ErrorCode.INVALID_TOKEN);
         }
     }
 
     @PostMapping("/sign-up")
     public ResponseEntity<Void> signUp(@RequestBody SignUpRequest request) {
-        try {
-            authService.signUp(request.getUsername(), request.getPassword());
-            return ResponseEntity.ok().build();
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.status(HttpStatus.CONFLICT).build();
-        }
+        authService.signUp(request.getUsername(), request.getPassword());
+        return ResponseEntity.ok().build();
     }
 
     @DeleteMapping("/auth/logout")
