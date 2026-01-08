@@ -51,10 +51,13 @@ public class Award extends BaseTimeEntity {
     @Column(nullable = false)
     private Orientation orientation = Orientation.LANDSCAPE;
 
+    @Column(name = "is_active", nullable = false)
+    private Boolean isActive = true;
+
     @Builder
     public Award(String id, String title, String awardee, String competition,
                  String summary, LocalDate awardDate, Integer year,
-                 FileEntity imageFile, Orientation orientation, Integer displayOrder) {
+                 FileEntity imageFile, Orientation orientation, Integer displayOrder, Boolean isActive) {
         this.id = id;
         this.title = title;
         this.awardee = awardee;
@@ -64,6 +67,7 @@ public class Award extends BaseTimeEntity {
         this.year = year;
         this.imageFile = imageFile;
         this.orientation = orientation != null ? orientation : Orientation.LANDSCAPE;
+        this.isActive = isActive != null ? isActive : true;
     }
 
     public void updateTitle(String title) {
@@ -97,6 +101,8 @@ public class Award extends BaseTimeEntity {
     public void updateOrientation(Orientation orientation) {
         this.orientation = orientation;
     }
+
+    public void updateIsActive(Boolean isActive) { this.isActive = isActive; }
 
     public enum Orientation {
         PORTRAIT, LANDSCAPE
