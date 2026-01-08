@@ -19,6 +19,8 @@ import wisoft.labservice.domain.award.entity.Award;
 import wisoft.labservice.domain.award.repository.AwardRepository;
 import wisoft.labservice.domain.file.entity.FileEntity;
 import wisoft.labservice.domain.file.service.FileService;
+import wisoft.labservice.domain.common.exception.BusinessException;
+import wisoft.labservice.domain.common.exception.ErrorCode;
 
 
 @Service
@@ -52,7 +54,7 @@ public class AwardService {
 
     public AdminAwardDetailResponse getAwardDetailForAdmin(final String awardId) {
         Award award = awardRepository.findByIdWithImageFile(awardId)
-                .orElseThrow(() -> new IllegalArgumentException("award not found with id:" + awardId));
+                .orElseThrow(() -> new BusinessException(ErrorCode.AWARD_NOT_FOUND));
 
         return AdminAwardDetailResponse.from(award);
     }
@@ -78,7 +80,7 @@ public class AwardService {
     @Transactional
     public void updateAward(final String awardId, final AdminAwardUpdateRequest request, final MultipartFile imageFile) {
         Award award = awardRepository.findByIdWithImageFile(awardId)
-                .orElseThrow(() -> new IllegalArgumentException("Award not found with id: " + awardId));
+                .orElseThrow(() -> new BusinessException(ErrorCode.AWARD_NOT_FOUND));
 
         if (request.title() != null) {
             award.updateTitle(request.title());
@@ -111,7 +113,7 @@ public class AwardService {
     @Transactional
     public void deleteAward(final String awardId) {
         Award award = awardRepository.findByIdWithImageFile(awardId)
-                .orElseThrow(() -> new IllegalArgumentException("Award not found with id: " + awardId));
+                .orElseThrow(() -> new BusinessException(ErrorCode.AWARD_NOT_FOUND));
 
         String fileId = null;
         if(award.getImageFile() != null) {

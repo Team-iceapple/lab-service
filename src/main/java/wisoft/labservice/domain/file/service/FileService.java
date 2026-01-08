@@ -13,6 +13,8 @@ import org.springframework.web.multipart.MultipartFile;
 import wisoft.labservice.domain.file.entity.FileCategory;
 import wisoft.labservice.domain.file.entity.FileEntity;
 import wisoft.labservice.domain.file.repository.FileRepository;
+import wisoft.labservice.domain.common.exception.BusinessException;
+import wisoft.labservice.domain.common.exception.ErrorCode;
 
 @Service
 @RequiredArgsConstructor
@@ -27,20 +29,20 @@ public class FileService {
 
     public FileEntity upload(MultipartFile file, String categoryRaw) {
         if (file == null || file.isEmpty()) {
-            throw new IllegalArgumentException("INVALID_FILE");
+            throw new BusinessException(ErrorCode.INVALID_FILE);
         }
 
         FileCategory category = FileCategory.from(categoryRaw);
 
         String originalName = file.getOriginalFilename();
         if (originalName == null || !originalName.contains(".")) {
-            throw new IllegalArgumentException("INVALID_FILE");
+            throw new BusinessException(ErrorCode.INVALID_FILE);
         }
 
         String ext = originalName.substring(originalName.lastIndexOf(".") + 1).toLowerCase();
 
         if (!ALLOWED_EXT.contains(ext)) {
-            throw new IllegalArgumentException("INVALID_FILE");
+            throw new BusinessException(ErrorCode.INVALID_FILE);
         }
 
         String id = "f_" + UUID.randomUUID();
@@ -59,7 +61,7 @@ public class FileService {
         try {
             file.transferTo(dest);
         } catch (IOException e) {
-            throw new RuntimeException("SERVER_ERROR", e);
+            throw new BusinessException(ErrorCode.INTERNAL_SERVER_ERROR, e);
         }
 
         // 클라이언트한테 보여줄 URL (나중에 /media 매핑만 해주면 됨)
@@ -76,7 +78,7 @@ public class FileService {
 
     public FileEntity get(String id) {
         return fileRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("FILE_NOT_FOUND"));
+                .orElseThrow(() -> new BusinessException(ErrorCode.FILE_NOT_FOUND));
     }
 
     public void delete(String id) {

@@ -6,6 +6,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import wisoft.labservice.domain.auth.repository.UserRepository;
 import wisoft.labservice.domain.auth.entity.User;
+import wisoft.labservice.domain.common.exception.BusinessException;
+import wisoft.labservice.domain.common.exception.ErrorCode;
 
 @Service
 @RequiredArgsConstructor
@@ -23,12 +25,12 @@ public class AuthService {
 
     public User getUser(final String username) {
         return authRepository.findByUsername(username)
-                .orElseThrow(() -> new RuntimeException("관리자 계정을 찾을 수 없습니다."));
+                .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
     }
 
     public void signUp(final String username, final String password) {
         if (authRepository.existsByUsername(username)) {
-            throw new IllegalArgumentException("이미 존재하는 사용자입니다.");
+            throw new BusinessException(ErrorCode.DUPLICATE_USER);
         }
 
         String encodedPassword = passwordEncoder.encode(password);
