@@ -7,6 +7,8 @@ import wisoft.labservice.domain.home.dto.request.NewsCreateRequest;
 import wisoft.labservice.domain.home.dto.request.NewsUpdateRequest;
 import wisoft.labservice.domain.home.entity.News;
 import wisoft.labservice.domain.home.repository.NewsRepository;
+import wisoft.labservice.domain.common.exception.BusinessException;
+import wisoft.labservice.domain.common.exception.ErrorCode;
 
 import java.util.List;
 import java.util.UUID;
@@ -27,7 +29,7 @@ public class NewsService {
     // 등록
     public News create(NewsCreateRequest req) {
         if (req.getTitle() == null || req.getTitle().isBlank()) {
-            throw new IllegalArgumentException("title is required");
+            throw new BusinessException(ErrorCode.MISSING_REQUIRED_PARAMETER, "title is required");
         }
 
         News news = News.builder()
@@ -44,7 +46,7 @@ public class NewsService {
     // 수정 (PATCH)
     public void update(String id, NewsUpdateRequest req) {
         News news = newsRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("news not found"));
+                .orElseThrow(() -> new BusinessException(ErrorCode.NEWS_NOT_FOUND));
 
         if (req.getTitle() != null) {
             news.updateTitle(req.getTitle());
@@ -63,7 +65,7 @@ public class NewsService {
     // 삭제
     public void delete(String id) {
         if (!newsRepository.existsById(id)) {
-            throw new IllegalArgumentException("news not found");
+            throw new BusinessException(ErrorCode.NEWS_NOT_FOUND);
         }
         newsRepository.deleteById(id);
     }

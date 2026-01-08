@@ -10,6 +10,8 @@ import wisoft.labservice.domain.home.dto.response.GalleryImageResponse;
 import wisoft.labservice.domain.home.dto.response.GallerySlideResponse;
 import wisoft.labservice.domain.home.entity.*;
 import wisoft.labservice.domain.home.repository.*;
+import wisoft.labservice.domain.common.exception.BusinessException;
+import wisoft.labservice.domain.common.exception.ErrorCode;
 
 import java.util.List;
 import java.util.UUID;
@@ -69,7 +71,7 @@ public class GalleryService {
 
     public GalleryImageResponse updateTitle(String imageId, String title) {
         LabImage image = labImageRepository.findById(imageId)
-                .orElseThrow();
+                .orElseThrow(() -> new BusinessException(ErrorCode.IMAGE_NOT_FOUND));
         image.updateTitle(title);
         return GalleryImageResponse.from(image);
     }
@@ -89,7 +91,8 @@ public class GalleryService {
                 .orElse(1);
 
         for (String imageId : imageIds) {
-            LabImage image = labImageRepository.findById(imageId).orElseThrow();
+            LabImage image = labImageRepository.findById(imageId)
+                    .orElseThrow(() -> new BusinessException(ErrorCode.IMAGE_NOT_FOUND));
 
             gallerySlideRepository.save(
                     GallerySlide.builder()
@@ -105,7 +108,8 @@ public class GalleryService {
 
     public void updateSlideOrder(List<SlideOrderUpdateRequest.SlideOrder> slides) {
         slides.forEach(s -> {
-            GallerySlide slide = gallerySlideRepository.findById(s.getId()).orElseThrow();
+            GallerySlide slide = gallerySlideRepository.findById(s.getId())
+                    .orElseThrow(() -> new BusinessException(ErrorCode.SLIDE_NOT_FOUND));
             slide.updateOrder(s.getOrder());
         });
     }

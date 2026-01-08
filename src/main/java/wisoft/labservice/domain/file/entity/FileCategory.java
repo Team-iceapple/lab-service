@@ -1,5 +1,8 @@
 package wisoft.labservice.domain.file.entity;
 
+import wisoft.labservice.domain.common.exception.BusinessException;
+import wisoft.labservice.domain.common.exception.ErrorCode;
+
 public enum FileCategory {
     HOME,
     PROJECT,
@@ -12,7 +15,7 @@ public enum FileCategory {
         try {
             return FileCategory.valueOf(value.toUpperCase());
         } catch (Exception e) {
-            throw new IllegalArgumentException("INVALID_CATEGORY");
+            throw new BusinessException(ErrorCode.INVALID_CATEGORY);
         }
     }
 }

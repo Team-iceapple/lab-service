@@ -7,6 +7,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
+import wisoft.labservice.domain.common.exception.BusinessException;
+import wisoft.labservice.domain.common.exception.ErrorCode;
 import wisoft.labservice.domain.file.entity.FileEntity;
 import wisoft.labservice.domain.file.service.FileService;
 import wisoft.labservice.domain.patent.dto.request.AdminPatentCreateRequest;
@@ -48,7 +50,7 @@ public class PatentService {
 
     public AdminPatentResponse getPatentDetailForAdmin(String patentId) {
         Patent patent = patentRepository.findByIdWithPdfFile(patentId)
-                .orElseThrow(() -> new IllegalArgumentException("patent not found with id:" + patentId));
+                .orElseThrow(() -> new BusinessException(ErrorCode.PATENT_NOT_FOUND));
 
         return AdminPatentResponse.from(patent);
     }
@@ -74,7 +76,7 @@ public class PatentService {
                             final MultipartFile pdfFile) {
 
         Patent patent = patentRepository.findByIdWithPdfFile(patentId)
-                .orElseThrow(() -> new IllegalArgumentException("Patent not found with id: " + patentId));
+                .orElseThrow(() -> new BusinessException(ErrorCode.PATENT_NOT_FOUND));
 
         if (request.name() != null) {
             patent.updateName(request.name());
@@ -100,7 +102,7 @@ public class PatentService {
     @Transactional
     public void deletePatent(final String patentId) {
         Patent patent = patentRepository.findByIdWithPdfFile(patentId)
-                .orElseThrow(() -> new IllegalArgumentException("Patent not found with id: " + patentId));
+                .orElseThrow(() -> new BusinessException(ErrorCode.PATENT_NOT_FOUND));
 
         String fileId = null;
         if(patent.getPdfFile() != null) {

@@ -7,6 +7,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
+import wisoft.labservice.domain.common.exception.BusinessException;
+import wisoft.labservice.domain.common.exception.ErrorCode;
 import wisoft.labservice.domain.file.entity.FileEntity;
 import wisoft.labservice.domain.file.service.FileService;
 import wisoft.labservice.domain.paper.dto.request.AdminPaperCreateRequest;
@@ -59,7 +61,7 @@ public class PaperService {
      */
     public AdminPaperDetailResponse getPaperDetailForAdmin(String paperId) {
         Paper paper = paperRepository.findByIdWithImageFile(paperId)
-                .orElseThrow(() -> new IllegalArgumentException("paper not found with id:" + paperId));
+                .orElseThrow(() -> new BusinessException(ErrorCode.PAPER_NOT_FOUND));
 
         return AdminPaperDetailResponse.from(paper);
     }
@@ -92,7 +94,7 @@ public class PaperService {
                             final MultipartFile imageFile) {
 
         Paper paper = paperRepository.findByIdWithImageFile(paperId)
-                .orElseThrow(() -> new IllegalArgumentException("Paper not found with id: " + paperId));
+                .orElseThrow(() -> new BusinessException(ErrorCode.PAPER_NOT_FOUND));
 
         if (request.title() != null) {
             paper.updateTitle(request.title());
@@ -110,7 +112,6 @@ public class PaperService {
             paper.updateJournal(request.journal());
         }
         if (request.publicationDate() != null) {
-
             paper.updatePublicationDate(request.publicationDate());
         }
         if (request.link() != null) {
@@ -122,7 +123,6 @@ public class PaperService {
 
         if (imageFile != null && !imageFile.isEmpty()) {
             if (paper.getImageFile() != null) {
-
                 fileService.delete(paper.getImageFile().getId());
             }
 
@@ -134,7 +134,7 @@ public class PaperService {
     @Transactional
     public void deletePaper(final String paperId) {
         Paper paper = paperRepository.findByIdWithImageFile(paperId)
-                .orElseThrow(() -> new IllegalArgumentException("Paper not found with id: " + paperId));
+                .orElseThrow(() -> new BusinessException(ErrorCode.PAPER_NOT_FOUND));
 
         String fileId = null;
         if(paper.getImageFile() != null) {

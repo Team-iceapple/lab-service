@@ -7,6 +7,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
+import wisoft.labservice.domain.common.exception.BusinessException;
+import wisoft.labservice.domain.common.exception.ErrorCode;
 import wisoft.labservice.domain.file.entity.FileEntity;
 import wisoft.labservice.domain.file.service.FileService;
 import wisoft.labservice.domain.project.dto.ProjectMemberDto;
@@ -49,7 +51,7 @@ public class ProjectService {
      */
     public ProjectDetailResponse getProjectDetailForUser(String projectId) {
         Project project = projectRepository.findByIdWithThumbnailFile(projectId)
-                .orElseThrow(() -> new IllegalArgumentException("Project not found with id: " + projectId));
+                .orElseThrow(() -> new BusinessException(ErrorCode.PROJECT_NOT_FOUND));
 
         return ProjectDetailResponse.from(project);
     }
@@ -72,7 +74,7 @@ public class ProjectService {
      */
     public AdminProjectDetailResponse getProjectDetailForAdmin(String projectId) {
         Project project = projectRepository.findByIdWithThumbnailFile(projectId)
-                .orElseThrow(() -> new IllegalArgumentException("Project not found with id: " + projectId));
+                .orElseThrow(() -> new BusinessException(ErrorCode.PROJECT_NOT_FOUND));
 
         return AdminProjectDetailResponse.from(project);
     }
@@ -112,7 +114,7 @@ public class ProjectService {
     @Transactional
     public void updateProject(String projectId, AdminProjectUpdateRequest request, MultipartFile thumbnail) {
         Project project = projectRepository.findByIdWithThumbnailFile(projectId)
-                .orElseThrow(() -> new IllegalArgumentException("Project not found with id: " + projectId));
+                .orElseThrow(() -> new BusinessException(ErrorCode.PROJECT_NOT_FOUND));
 
         if (request.year() != null) {
             project.updateYear(request.year());
@@ -155,7 +157,7 @@ public class ProjectService {
     @Transactional
     public void deleteProject(String projectId) {
         Project project = projectRepository.findByIdWithThumbnailFile(projectId)
-                .orElseThrow(() -> new IllegalArgumentException("Project not found with id: " + projectId));
+                .orElseThrow(() -> new BusinessException(ErrorCode.PROJECT_NOT_FOUND));
 
         String fileId = null;
         if (project.getThumbnailFile() != null) {
