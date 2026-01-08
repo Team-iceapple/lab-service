@@ -52,10 +52,13 @@ public class Project {
     @Column(length = 500)
     private String link;
 
+    @Column(name = "is_active", nullable = false)
+    private Boolean isActive = true;
+
     @Builder
     public Project(String id, String name, Integer year, ProjectStatus status,
                    String description, List<ProjectMember> members,
-                   FileEntity thumbnailFile, String link) {
+                   FileEntity thumbnailFile, String link, Boolean isActive) {
         this.id = id;
         this.name = name;
         this.year = year;
@@ -64,6 +67,7 @@ public class Project {
         this.members = members;
         this.thumbnailFile = thumbnailFile;
         this.link = link;
+        this.isActive=isActive != null ? isActive : true;
     }
 
     public void updateName(String name) {
@@ -93,6 +97,8 @@ public class Project {
     public void updateLink(String link) {
         this.link = link;
     }
+
+    public void updateIsActive(Boolean isActive) {this.isActive = isActive; }
 
     public enum ProjectStatus {
         PROGRESS, DONE

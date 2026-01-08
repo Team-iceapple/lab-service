@@ -53,12 +53,13 @@ public class Paper extends BaseTimeEntity {
     @JoinColumn(name = "image_file_id")
     private FileEntity imageFile;
 
-
+    @Column(name = "is_active", nullable = false)
+    private Boolean isActive = true;
 
     @Builder
     public Paper(String id, String title, String authors, String paperAbstract,
                  String conference, String journal, LocalDate publicationDate,
-                 String link, Integer year, FileEntity imageFile) {
+                 String link, Integer year, FileEntity imageFile, Boolean isActive) {
         this.id = id;
         this.title = title;
         this.authors = authors;
@@ -69,6 +70,7 @@ public class Paper extends BaseTimeEntity {
         this.link = link;
         this.year = year;
         this.imageFile = imageFile;
+        this.isActive = isActive != null ? isActive : true;
     }
 
     public void updateTitle(String title) {
@@ -106,4 +108,6 @@ public class Paper extends BaseTimeEntity {
     public void updateImageFile(FileEntity imageFile) {
         this.imageFile = imageFile;
     }
+
+    public void updateIsActive(Boolean isActive) { this.isActive = isActive; }
 }
