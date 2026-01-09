@@ -22,6 +22,9 @@ public record AdminPaperUpdateRequest(
 
         String link,
 
-        Integer year
+        Integer year,
+
+        @JsonProperty("is_active")
+        Boolean isActive
 ) {
 }
