@@ -32,7 +32,7 @@ public class AwardService {
     private final FileService fileService;
 
     public AwardListResponse getAwardsForUser() {
-        List<Award> awards = awardRepository.findAllWithImageFile();
+        List<Award> awards = awardRepository.findAllActiveWithImageFile();
 
         List<AwardResponse> awardResponse = awards.stream()
                 .map(AwardResponse::from)
@@ -72,6 +72,7 @@ public class AwardService {
                 .awardDate(request.date())
                 .year(request.year())
                 .imageFile(uploadedFile)
+                .isActive(request.isActive())
                 .build();
 
         awardRepository.save(award);
@@ -99,6 +100,9 @@ public class AwardService {
         }
         if (request.year() != null) {
             award.updateYear(request.year());
+        }
+        if (request.isActive() != null) {
+            award.updateIsActive(request.isActive());
         }
         if (imageFile != null && !imageFile.isEmpty()) {
             if (award.getImageFile() != null) {
