@@ -8,21 +8,14 @@ import wisoft.labservice.domain.project.entity.Project;
 
 public record AdminProjectResponse(
         String id,
-
         Integer year,
-
         String status,
-
         String name,
-
         String description,
-
         List<ProjectMemberDto> members,
-
-        @JsonProperty("thumbnail_url")
-        String thumbnailUrl,
-
-        String link
+        @JsonProperty("thumbnail_url") String thumbnailUrl,
+        String link,
+        @JsonProperty("is_active") Boolean isActive
 ) {
     public static AdminProjectResponse from(Project project) {
         return new AdminProjectResponse(
@@ -31,9 +24,12 @@ public record AdminProjectResponse(
                 project.getStatus().name().toLowerCase(),
                 project.getName(),
                 project.getDescription(),
-                project.getMembers() != null ? project.getMembers().stream().map(ProjectMemberDto::from).collect(Collectors.toList()) : List.of(),
+                project.getMembers() != null
+                        ? project.getMembers().stream().map(ProjectMemberDto::from).toList()
+                        : List.of(),
                 project.getThumbnailFile() != null ? project.getThumbnailFile().getFileUrl() : null,
-                project.getLink()
+                project.getLink(),
+                project.getIsActive()
         );
     }
 }
