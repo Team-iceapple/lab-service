@@ -47,7 +47,7 @@ public class CalendarSyncScheduler {
         for (int i = 0; i < events.size(); i++) {
             HomeCalendarResponse e = events.get(i);
             sb.append(String.format(
-                    "[%d] %s ~ %s | %s | location=%s%n",
+                    "[%d] %s ~ %s | %s | allDay=%s%n",
                     i,
                     e.start(),
                     e.end(),
