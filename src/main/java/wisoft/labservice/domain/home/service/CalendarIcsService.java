@@ -1,6 +1,7 @@
 package wisoft.labservice.domain.home.service;
 
 import java.time.DayOfWeek;
+import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -168,7 +169,16 @@ public class CalendarIcsService {
                     sequence, lastModified);
         }
 
-        return new CalendarSyncEvent(id, title, false, instanceStart, instanceStart, sequence, lastModified);
+        ZonedDateTime instanceEnd = instanceStart;
+        Property startP = event.getProperty("DTSTART").orElse(null);
+        Property endP = event.getProperty("DTEND").orElse(null);
+        if (startP instanceof DateProperty<?> sp && endP instanceof DateProperty<?> ep) {
+            ZonedDateTime originalStart = toKst(sp.getDate());
+            ZonedDateTime originalEnd = toKst(ep.getDate());
+            instanceEnd = instanceStart.plus(Duration.between(originalStart, originalEnd));
+        }
+
+        return new CalendarSyncEvent(id, title, false, instanceStart, instanceEnd, sequence, lastModified);
     }
 
     private List<LocalDate> expandRrule(LocalDate dtstart, String rruleValue, LocalDate windowStart,
