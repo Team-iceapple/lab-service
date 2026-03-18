@@ -1,6 +1,5 @@
 package wisoft.labservice.domain.home.service;
 
-import java.time.DayOfWeek;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDate;
@@ -10,13 +9,10 @@ import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
-import java.time.temporal.ChronoUnit;
 import java.time.temporal.TemporalAccessor;
-import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -24,6 +20,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.fortuna.ical4j.model.Component;
 import net.fortuna.ical4j.model.Property;
+import net.fortuna.ical4j.model.Recur;
 import net.fortuna.ical4j.model.component.VEvent;
 import net.fortuna.ical4j.model.property.DateProperty;
 import net.fortuna.ical4j.model.property.Sequence;
@@ -94,8 +91,8 @@ public class CalendarIcsService {
                             ? (LocalDate) dtstart
                             : toKst(dtstart).toLocalDate();
 
-                    List<LocalDate> dates = expandRrule(seed, rruleProp.getValue(), now.toLocalDate(),
-                            until.toLocalDate());
+                    Recur<LocalDate> recur = new Recur<>(rruleProp.getValue());
+                    List<LocalDate> dates = recur.getDates(seed, now.toLocalDate(), until.toLocalDate());
 
                     for (LocalDate date : dates) {
                         if (excluded.contains(date)) {
@@ -179,157 +176,6 @@ public class CalendarIcsService {
         }
 
         return new CalendarSyncEvent(id, title, false, instanceStart, instanceEnd, sequence, lastModified);
-    }
-
-    private List<LocalDate> expandRrule(LocalDate dtstart, String rruleValue, LocalDate windowStart,
-                                        LocalDate windowEnd) {
-        List<LocalDate> result = new ArrayList<>();
-
-        Map<String, String> params = new HashMap<>();
-        for (String part : rruleValue.split(";")) {
-            String[] kv = part.split("=", 2);
-            if (kv.length == 2) {
-                params.put(kv[0], kv[1]);
-            }
-        }
-
-        String freq = params.getOrDefault("FREQ", "");
-        int interval = Integer.parseInt(params.getOrDefault("INTERVAL", "1"));
-
-        LocalDate untilDate = null;
-        if (params.containsKey("UNTIL")) {
-            try {
-                untilDate = LocalDate.parse(params.get("UNTIL").replaceAll("[TZ].*", ""),
-                        DateTimeFormatter.BASIC_ISO_DATE);
-            } catch (Exception ignored) {
-            }
-        }
-        LocalDate effectiveEnd = (untilDate != null && untilDate.isBefore(windowEnd)) ? untilDate : windowEnd;
-
-        Integer count = null;
-        if (params.containsKey("COUNT")) {
-            try {
-                count = Integer.parseInt(params.get("COUNT"));
-            } catch (Exception ignored) {
-            }
-        }
-
-        Map<String, DayOfWeek> dayMap = Map.of(
-                "MO", DayOfWeek.MONDAY, "TU", DayOfWeek.TUESDAY,
-                "WE", DayOfWeek.WEDNESDAY, "TH", DayOfWeek.THURSDAY,
-                "FR", DayOfWeek.FRIDAY, "SA", DayOfWeek.SATURDAY, "SU", DayOfWeek.SUNDAY
-        );
-        Set<DayOfWeek> byDay = new LinkedHashSet<>();
-        if (params.containsKey("BYDAY")) {
-            for (String d : params.get("BYDAY").split(",")) {
-                DayOfWeek dow = dayMap.get(d.replaceAll("[0-9+\\-]", ""));
-                if (dow != null) {
-                    byDay.add(dow);
-                }
-            }
-        }
-        if (byDay.isEmpty()) {
-            byDay.add(dtstart.getDayOfWeek());
-        }
-
-        switch (freq) {
-            case "DAILY" -> {
-                int generated = 0;
-                if (count != null) {
-                    for (LocalDate d = dtstart; d.isBefore(windowStart) && generated < count;
-                         d = d.plusDays(interval)) {
-                        generated++;
-                    }
-                }
-                long days = ChronoUnit.DAYS.between(dtstart, windowStart);
-                long skip = (days / interval) * interval;
-                LocalDate start = dtstart.plusDays(skip);
-                if (start.isBefore(windowStart)) {
-                    start = start.plusDays(interval);
-                }
-                for (LocalDate d = start; !d.isAfter(effectiveEnd); d = d.plusDays(interval)) {
-                    if (count != null && generated >= count) {
-                        break;
-                    }
-                    result.add(d);
-                    generated++;
-                }
-            }
-            case "WEEKLY" -> {
-                LocalDate dtstartWeek = dtstart.with(DayOfWeek.MONDAY);
-                int generated = 0;
-                if (count != null) {
-                    for (LocalDate d = dtstart; d.isBefore(windowStart) && generated < count; d = d.plusDays(1)) {
-                        if (!byDay.contains(d.getDayOfWeek())) {
-                            continue;
-                        }
-                        long weeks = ChronoUnit.WEEKS.between(dtstartWeek, d.with(DayOfWeek.MONDAY));
-                        if (weeks >= 0 && weeks % interval == 0) {
-                            generated++;
-                        }
-                    }
-                }
-                for (LocalDate d = windowStart; !d.isAfter(effectiveEnd); d = d.plusDays(1)) {
-                    if (count != null && generated >= count) {
-                        break;
-                    }
-                    if (d.isBefore(dtstart) || !byDay.contains(d.getDayOfWeek())) {
-                        continue;
-                    }
-                    long weeks = ChronoUnit.WEEKS.between(dtstartWeek, d.with(DayOfWeek.MONDAY));
-                    if (weeks >= 0 && weeks % interval == 0) {
-                        result.add(d);
-                        generated++;
-                    }
-                }
-            }
-            case "MONTHLY" -> {
-                int generated = 0;
-                if (count != null) {
-                    for (LocalDate d = dtstart; d.isBefore(windowStart) && generated < count;
-                         d = d.plusMonths(interval)) {
-                        generated++;
-                    }
-                }
-                long months = ChronoUnit.MONTHS.between(dtstart, windowStart);
-                long skip = (months / interval) * interval;
-                LocalDate start = dtstart.plusMonths(skip);
-                if (start.isBefore(windowStart)) {
-                    start = start.plusMonths(interval);
-                }
-                for (LocalDate d = start; !d.isAfter(effectiveEnd); d = d.plusMonths(interval)) {
-                    if (count != null && generated >= count) {
-                        break;
-                    }
-                    result.add(d);
-                    generated++;
-                }
-            }
-            case "YEARLY" -> {
-                int generated = 0;
-                if (count != null) {
-                    for (LocalDate d = dtstart; d.isBefore(windowStart) && generated < count;
-                         d = d.plusYears(interval)) {
-                        generated++;
-                    }
-                }
-                long years = ChronoUnit.YEARS.between(dtstart, windowStart);
-                long skip = (years / interval) * interval;
-                LocalDate start = dtstart.plusYears(skip);
-                if (start.isBefore(windowStart)) {
-                    start = start.plusYears(interval);
-                }
-                for (LocalDate d = start; !d.isAfter(effectiveEnd); d = d.plusYears(interval)) {
-                    if (count != null && generated >= count) {
-                        break;
-                    }
-                    result.add(d);
-                    generated++;
-                }
-            }
-        }
-
-        return result;
     }
 
     private CalendarSyncEvent pickLatest(
