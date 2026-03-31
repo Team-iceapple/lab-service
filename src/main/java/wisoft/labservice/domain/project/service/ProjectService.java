@@ -37,7 +37,7 @@ public class ProjectService {
      * 프로젝트 목록 조회 (사용자용)
      */
     public ProjectListResponse getProjectsForUser() {
-        List<Project> projects = projectRepository.findAllWithThumbnailFile();
+        List<Project> projects = projectRepository.findAllActiveWithThumbnailFile();
 
         List<ProjectResponse> projectResponses = projects.stream()
                 .map(ProjectResponse::from)
@@ -50,7 +50,7 @@ public class ProjectService {
      * 프로젝트 상세 조회 (사용자용)
      */
     public ProjectDetailResponse getProjectDetailForUser(String projectId) {
-        Project project = projectRepository.findByIdWithThumbnailFile(projectId)
+        Project project = projectRepository.findActiveByIdWithThumbnailFile(projectId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.PROJECT_NOT_FOUND));
 
         return ProjectDetailResponse.from(project);
@@ -102,6 +102,7 @@ public class ProjectService {
                 .members(members)
                 .thumbnailFile(uploadedFile)
                 .link(request.link())
+                .isActive(request.isActive())
                 .build();
 
         Project saveProject = projectRepository.save(project);
@@ -137,6 +138,9 @@ public class ProjectService {
         }
         if (request.link() != null) {
             project.updateLink(request.link());
+        }
+        if (request.isActive() != null) {
+            project.updateIsActive(request.isActive());
         }
 
         if (thumbnail != null && !thumbnail.isEmpty()) {

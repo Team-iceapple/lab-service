@@ -55,7 +55,7 @@ public class AdminPaperController {
             @RequestParam String link,
             @RequestParam Integer year,
             @RequestPart("image_file") MultipartFile imageFile) {
-            AdminPaperCreateRequest request = new AdminPaperCreateRequest(title, authors, paperAbstract, conference, journal, publicationDate, link, year);
+            AdminPaperCreateRequest request = new AdminPaperCreateRequest(title, authors, paperAbstract, conference, journal, publicationDate, link, year, true);
 
             paperService.createPaper(request, imageFile);
 
@@ -76,10 +76,11 @@ public class AdminPaperController {
             LocalDate publicationDate,
             @RequestParam(required = false) String link,
             @RequestParam(required = false) Integer year,
-            @RequestPart(name = "image_file", required = false) MultipartFile imageFile) {
+            @RequestPart(name = "image_file", required = false) MultipartFile imageFile,
+            @RequestParam(name = "is_active", required = false) Boolean isActive ) {
 
 
-        AdminPaperUpdateRequest request = new AdminPaperUpdateRequest(title, authors, paperAbstract, conference, journal, publicationDate, link, year);
+        AdminPaperUpdateRequest request = new AdminPaperUpdateRequest(title, authors, paperAbstract, conference, journal, publicationDate, link, year, isActive);
 
         paperService.updatePaper(paperId, request, imageFile);
 

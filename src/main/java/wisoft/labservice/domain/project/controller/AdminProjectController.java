@@ -59,7 +59,7 @@ public class AdminProjectController {
 
         List<ProjectMemberDto> memberList = objectMapper.readValue(members, new TypeReference<>() {});
 
-        AdminProjectCreateRequest request = new AdminProjectCreateRequest(year, status, name, description, memberList, link);
+        AdminProjectCreateRequest request = new AdminProjectCreateRequest(year, status, name, description, memberList, link, true);
 
         String response = projectService.createProject(request, thumbnail);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
@@ -74,7 +74,8 @@ public class AdminProjectController {
             @RequestParam(required = false) String description,
             @RequestParam(required = false) String members,
             @RequestParam(required = false) String link,
-            @RequestParam(name = "thumbnail", required = false) MultipartFile thumbnail) throws
+            @RequestParam(name = "thumbnail", required = false) MultipartFile thumbnail,
+            @RequestParam(name = "is_active", required = false) Boolean isActive ) throws
             JsonProcessingException {
 
         List<ProjectMemberDto> memberList = null;
@@ -82,7 +83,7 @@ public class AdminProjectController {
             memberList = objectMapper.readValue(members, new TypeReference<List<ProjectMemberDto>>() {});
         }
 
-        AdminProjectUpdateRequest request = new AdminProjectUpdateRequest(year, status, name, description, memberList, link);
+        AdminProjectUpdateRequest request = new AdminProjectUpdateRequest(year, status, name, description, memberList, link, isActive);
 
         projectService.updateProject(projectId, request, thumbnail);
 

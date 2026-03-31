@@ -48,14 +48,20 @@ public class AdminPatentController {
     public ResponseEntity<Void> createPatent(
             @RequestParam String name,
             @RequestParam Integer year,
+            @RequestParam(required = false) String inventor,
             @RequestParam(name = "invention_date")
             @DateTimeFormat(pattern = "yyyy-MM-dd")
             LocalDate inventionDate,
             @RequestPart("pdf_file") MultipartFile pdfFile,
-            @RequestParam String link)
+            @RequestParam String link,
+            @RequestParam(name = "is_active", defaultValue = "true") Boolean isActive,
+            @RequestPart("thumbnail_file") MultipartFile thumbnailFile )
+
     {
-        AdminPatentCreateRequest request = new AdminPatentCreateRequest(name, year, inventionDate, link);
-        patentService.createPatent(request, pdfFile);
+        AdminPatentCreateRequest request =
+                new AdminPatentCreateRequest(name, year, inventor, inventionDate, link, isActive);
+
+        patentService.createPatent(request, pdfFile, thumbnailFile);
 
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
@@ -66,14 +72,17 @@ public class AdminPatentController {
             @PathVariable String patentId,
             @RequestParam(required = false) String name,
             @RequestParam(required = false) Integer year,
+            @RequestParam(required = false) String inventor,
             @RequestParam(name = "invention_date", required = false)
             @DateTimeFormat(pattern = "yyyy-MM-dd")
             LocalDate inventionDate,
             @RequestPart(name = "pdf_file", required = false) MultipartFile pdfFile,
-            @RequestParam(required = false) String link)
+            @RequestParam(required = false) String link,
+            @RequestParam(name = "is_active", required = false) Boolean isActive,
+            @RequestPart(name = "thumbnail_file", required = false) MultipartFile thumbnailFile )
     {
-        AdminPatentUpdateRequest request = new AdminPatentUpdateRequest(name, year, inventionDate, link);
-        patentService.updatePatent(patentId, request, pdfFile);
+        AdminPatentUpdateRequest request = new AdminPatentUpdateRequest(name, year, inventor, inventionDate, link, isActive);
+        patentService.updatePatent(patentId, request, pdfFile, thumbnailFile);
         return ResponseEntity.ok().build();
     }
 

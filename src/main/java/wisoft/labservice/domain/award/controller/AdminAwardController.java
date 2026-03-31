@@ -65,10 +65,11 @@ public class AdminAwardController {
             @DateTimeFormat(pattern = "yyyy-MM-dd")
             LocalDate date,
             @RequestParam(required = false) Integer year,
+            @RequestParam(name = "is_active", required = false) Boolean isActive,
             @RequestPart(name = "image_file", required = false) MultipartFile imageFile) {
 
 
-        AdminAwardUpdateRequest request = new AdminAwardUpdateRequest(title, awardee, competition, summary, date, year);
+        AdminAwardUpdateRequest request = new AdminAwardUpdateRequest(title, awardee, competition, summary, date, year, isActive);
 
         awardService.updateAward(awardId, request, imageFile);
 

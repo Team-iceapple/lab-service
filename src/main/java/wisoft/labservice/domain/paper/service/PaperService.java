@@ -34,13 +34,23 @@ public class PaperService {
      * 논문 목록 조회 (사용자용)
      */
     public PaperListResponse getPapersForUser() {
-        List<Paper> papers = paperRepository.findAllWithImageFile();
+        List<Paper> papers = paperRepository.findAllActiveWithImageFile();
 
         List<PaperResponse> paperResponse = papers.stream()
                 .map(PaperResponse::from)
                 .collect(Collectors.toList());
 
         return new PaperListResponse(paperResponse);
+    }
+
+    /**
+     * 논문 상세 조회 (사용자용)
+     */
+    public PaperResponse getPaperDetailForUser(String paperId) {
+        Paper paper = paperRepository.findActiveByIdWithImageFile(paperId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.PAPER_NOT_FOUND));
+
+        return PaperResponse.from(paper);
     }
 
     /**
@@ -84,11 +94,15 @@ public class PaperService {
                 .link(request.link())
                 .year(request.year())
                 .imageFile(uploadedFile)
+                .isActive(request.isActive())
                 .build();
 
         paperRepository.save(paper);
     }
 
+    /**
+     * 논문 수정 (관리자용)
+     */
     @Transactional
     public void updatePaper(final String paperId, final AdminPaperUpdateRequest request,
                             final MultipartFile imageFile) {
@@ -119,6 +133,9 @@ public class PaperService {
         }
         if (request.year() != null) {
             paper.updateYear(request.year());
+        }
+        if (request.isActive() != null) {
+            paper.updateIsActive(request.isActive());
         }
 
         if (imageFile != null && !imageFile.isEmpty()) {

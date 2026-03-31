@@ -9,10 +9,15 @@ public record AdminPatentUpdateRequest(
 
         Integer year,
 
+        String inventor,
+
         @JsonProperty("invention_date")
         @JsonFormat(pattern = "yyyy-MM-dd")
         LocalDate inventionDate,
 
-        String link
+        String link,
+
+        @JsonProperty("is_active")
+        Boolean isActive
 ) {
 }
